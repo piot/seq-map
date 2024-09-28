@@ -77,6 +77,7 @@ where
     /// assert!(map.insert("key".to_string(), 43).is_err());
     /// ```
     pub fn insert(&mut self, key: K, value: V) -> Result<(), SeqMapError> {
+        #[allow(clippy::map_entry)]
         if self.key_to_index.contains_key(&key) {
             Err(SeqMapError::KeyAlreadyExists)
         } else {
