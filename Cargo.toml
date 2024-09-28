@@ -1,0 +1,12 @@
+[package]
+name = "seq-map"
+version = "0.0.1"
+edition = "2021"
+license = "MIT"
+description = "Sequential Map"
+repository = "https://github.com/piot/seq-map"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+
+[dependencies]
