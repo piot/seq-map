@@ -10,9 +10,9 @@
 
 ## Installation
 
-Add `seq_map` to your `Cargo.toml` dependencies:
+Add `seq-map` to your `Cargo.toml` dependencies:
 
 ```toml
 [dependencies]
-seq_map = "0.0.1"
+seq-map = "0.0.1"
 ```
