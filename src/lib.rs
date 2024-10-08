@@ -2,7 +2,6 @@
  * Copyright (c) Peter Bjorklund. All rights reserved. https://github.com/piot/seq-map
  * Licensed under the MIT License. See LICENSE in the project root for license information.
  */
-
 use std::{
     collections::HashMap,
     error::Error,
@@ -18,10 +17,24 @@ use std::{
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct SeqMap<K, V>
 where
-    K: Eq + Hash + Clone,
+    K: Eq + Hash + Clone + Display,
 {
     key_to_index: HashMap<K, usize>, // Maps keys to their index in `entries`
     entries: Vec<(K, V)>,            // Stores key-value pairs in insertion order
+}
+
+impl<K, V> Display for SeqMap<K, V>
+where
+    K: Eq + Hash + Clone + Display,
+    V: Display,
+{
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "SeqMap({})", self.entries.len())?;
+        for (key, value) in &self.entries {
+            write!(f, "\n{key}: {value}")?;
+        }
+        Ok(())
+    }
 }
 
 /// Errors that can occur when manipulating a `SeqMap`.
@@ -43,7 +56,8 @@ impl Error for SeqMapError {}
 
 impl<K, V> SeqMap<K, V>
 where
-    K: Eq + Hash + Clone,
+    K: Eq + Hash + Clone + Display,
+    V: Display,
 {
     /// Creates a new, empty `SeqMap`.
     ///
@@ -191,7 +205,8 @@ where
 
 impl<K, V> Index<&K> for SeqMap<K, V>
 where
-    K: Eq + Hash + Clone,
+    K: Eq + Hash + Clone + Display,
+    V: Display,
 {
     type Output = V;
 
@@ -216,8 +231,8 @@ where
 
 impl<K, V> From<&[(K, V)]> for SeqMap<K, V>
 where
-    K: Eq + Hash + Clone,
-    V: Clone,
+    K: Eq + Hash + Clone + Display,
+    V: Clone + Display,
 {
     /// Creates a `SeqMap` from a slice of key-value pairs.
     ///
@@ -247,7 +262,7 @@ where
 
 impl<'a, K, V> IntoIterator for &'a SeqMap<K, V>
 where
-    K: Eq + Hash + Clone,
+    K: Eq + Hash + Clone + Display,
 {
     type Item = (&'a K, &'a V);
     type IntoIter = std::iter::Map<std::slice::Iter<'a, (K, V)>, fn(&'a (K, V)) -> (&'a K, &'a V)>;
@@ -300,7 +315,8 @@ where
 
 impl<K, V> Default for SeqMap<K, V>
 where
-    K: Eq + Hash + Clone,
+    K: Eq + Hash + Clone + Display,
+    V: Display,
 {
     /// Creates a new, empty `SeqMap`.
     ///
