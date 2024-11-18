@@ -119,6 +119,11 @@ where
         }
     }
 
+    /// Checks if the map contains a key.
+    pub fn contains_key(&self, key: &K) -> bool {
+        self.key_to_index.contains_key(key)
+    }
+
     /// Returns a mutable reference to the value corresponding to the key.
     ///
     /// Returns `None` if the key does not exist.
