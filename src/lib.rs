@@ -17,7 +17,7 @@ use std::{
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct SeqMap<K, V>
 where
-    K: Eq + Hash + Clone + Display,
+    K: Eq + Hash + Clone,
 {
     key_to_index: HashMap<K, usize>, // Maps keys to their index in `entries`
     entries: Vec<(K, V)>,            // Stores key-value pairs in insertion order
