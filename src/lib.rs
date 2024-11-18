@@ -44,7 +44,12 @@ where
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "SeqMap(")?;
+        let mut first = true;
         for (key, value) in &self.entries {
+            if !first {
+                write!(f, ", ")?;
+            }
+            first = false;
             write!(f, "{key:?}: {value:?}")?;
         }
         write!(f, ")")
@@ -328,7 +333,7 @@ where
 
 impl<K, V> Default for SeqMap<K, V>
 where
-    K: Eq + Hash + Clone
+    K: Eq + Hash + Clone,
 {
     /// Creates a new, empty `SeqMap`.
     ///
