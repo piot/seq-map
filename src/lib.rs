@@ -5,7 +5,7 @@
 use std::{
     collections::HashMap,
     error::Error,
-    fmt::{self, Display, Formatter},
+    fmt::{self, Debug, Display, Formatter},
     hash::Hash,
     ops::Index,
 };
@@ -14,7 +14,7 @@ use std::{
 ///
 /// Internally, it uses a [`HashMap`] for quick key lookups and a [`Vec`] to maintain the order
 /// of inserted key-value pairs.
-#[derive(PartialEq, Eq, Debug, Clone)]
+#[derive(PartialEq, Eq, Clone)]
 pub struct SeqMap<K, V>
 where
     K: Eq + Hash + Clone,
@@ -37,6 +37,20 @@ where
     }
 }
 
+impl<K, V> Debug for SeqMap<K, V>
+where
+    K: Eq + Hash + Clone + Debug,
+    V: Debug,
+{
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "SeqMap(")?;
+        for (key, value) in &self.entries {
+            write!(f, "{key:?}: {value:?}")?;
+        }
+        write!(f, ")")
+    }
+}
+
 /// Errors that can occur when manipulating a `SeqMap`.
 #[derive(Debug)]
 pub enum SeqMapError {
@@ -56,8 +70,7 @@ impl Error for SeqMapError {}
 
 impl<K, V> SeqMap<K, V>
 where
-    K: Eq + Hash + Clone + Display,
-    V: Display,
+    K: Eq + Hash + Clone,
 {
     /// Creates a new, empty `SeqMap`.
     ///
@@ -315,8 +328,7 @@ where
 
 impl<K, V> Default for SeqMap<K, V>
 where
-    K: Eq + Hash + Clone + Display,
-    V: Display,
+    K: Eq + Hash + Clone
 {
     /// Creates a new, empty `SeqMap`.
     ///
