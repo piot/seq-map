@@ -37,6 +37,17 @@ fn index() {
 }
 
 #[test]
+fn iter() {
+    let mut map = SeqMap::new();
+
+    map.insert(10, 20).expect("should work");
+    map.insert(42, -13).expect("should work");
+    for (k, v) in map.iter() {
+        println!("{}: {}", k, v);
+    }
+}
+
+#[test]
 fn test_hash() {
     use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};

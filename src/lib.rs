@@ -222,6 +222,10 @@ where
         self.key_to_index.get(key).copied()
     }
 
+    pub fn iter(&self) -> impl Iterator<Item = (&K, &V)> {
+        self.entries.iter().map(|(k, v)| (k, v))
+    }
+
     /// Retrieves a reference to the value corresponding to the key.
     ///
     /// This method performs a faster lookup using the internal `HashMap`.
