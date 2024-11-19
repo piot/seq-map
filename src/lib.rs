@@ -218,6 +218,10 @@ where
         self.entries.iter().map(|(_, v)| v)
     }
 
+    pub fn get_index(&self, key: &K) -> Option<usize> {
+        self.key_to_index.get(key).copied()
+    }
+
     /// Retrieves a reference to the value corresponding to the key.
     ///
     /// This method performs a faster lookup using the internal `HashMap`.

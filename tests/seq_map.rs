@@ -25,6 +25,18 @@ fn debug() {
 }
 
 #[test]
+fn index() {
+    let mut map = SeqMap::new();
+
+    map.insert(10, 20).expect("should work");
+    map.insert(42, -13).expect("should work");
+
+    assert_eq!(map.get_index(&42), Some(1));
+    assert_eq!(map.get_index(&10), Some(0));
+    assert_eq!(map.get_index(&100), None);
+}
+
+#[test]
 fn test_hash() {
     use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};
