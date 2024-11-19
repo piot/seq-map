@@ -23,3 +23,26 @@ fn debug() {
 
     assert_eq!(format!("{:?}", map), "SeqMap(10: 20, 42: -13)")
 }
+
+#[test]
+fn test_hash() {
+    use std::collections::hash_map::DefaultHasher;
+    use std::hash::{Hash, Hasher};
+
+    let mut map1 = SeqMap::new();
+    let mut map2 = SeqMap::new();
+
+    map1.insert(1, "a").unwrap();
+    map1.insert(2, "b").unwrap();
+
+    map2.insert(1, "a").unwrap();
+    map2.insert(2, "b").unwrap();
+
+    let mut hasher1 = DefaultHasher::new();
+    let mut hasher2 = DefaultHasher::new();
+
+    map1.hash(&mut hasher1);
+    map2.hash(&mut hasher2);
+
+    assert_eq!(hasher1.finish(), hasher2.finish());
+}

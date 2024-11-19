@@ -6,7 +6,7 @@ use std::{
     collections::HashMap,
     error::Error,
     fmt::{self, Debug, Display, Formatter},
-    hash::Hash,
+    hash::{Hash, Hasher},
     ops::Index,
 };
 
@@ -21,6 +21,19 @@ where
 {
     key_to_index: HashMap<K, usize>, // Maps keys to their index in `entries`
     entries: Vec<(K, V)>,            // Stores key-value pairs in insertion order
+}
+
+impl<K, V> Hash for SeqMap<K, V>
+where
+    K: Eq + Hash + Clone,
+    V: Hash,
+{
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        for (key, value) in &self.entries {
+            key.hash(state);
+            value.hash(state);
+        }
+    }
 }
 
 impl<K, V> Display for SeqMap<K, V>
