@@ -33,6 +33,29 @@ where
     }
 }
 
+impl<K, V> PartialEq for SeqMap<K, V>
+where
+    K: Eq,
+    V: Eq,
+{
+    fn eq(&self, other: &Self) -> bool {
+        if self.entries.len() != other.entries.len() {
+            return false;
+        }
+        self.entries
+            .iter()
+            .zip(other.entries.iter())
+            .all(|(a, b)| a == b)
+    }
+}
+
+impl<K, V> Eq for SeqMap<K, V>
+where
+    K: Eq,
+    V: Eq,
+{
+}
+
 impl<K, V> Display for SeqMap<K, V>
 where
     K: Eq + Hash + Display,
