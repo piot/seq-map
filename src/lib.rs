@@ -14,18 +14,15 @@ use std::{
 ///
 /// Internally, it uses a [`HashMap`] for quick key lookups and a [`Vec`] to maintain the order
 /// of inserted key-value pairs.
-#[derive(PartialEq, Eq, Clone)]
-pub struct SeqMap<K, V>
-where
-    K: Eq + Hash + Clone,
-{
+#[derive(Clone)]
+pub struct SeqMap<K, V> {
     key_to_index: HashMap<K, usize>, // Maps keys to their index in `entries`
     entries: Vec<(K, V)>,            // Stores key-value pairs in insertion order
 }
 
 impl<K, V> Hash for SeqMap<K, V>
 where
-    K: Eq + Hash + Clone,
+    K: Hash,
     V: Hash,
 {
     fn hash<H: Hasher>(&self, state: &mut H) {
@@ -38,7 +35,7 @@ where
 
 impl<K, V> Display for SeqMap<K, V>
 where
-    K: Eq + Hash + Clone + Display,
+    K: Eq + Hash + Display,
     V: Display,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
@@ -52,7 +49,7 @@ where
 
 impl<K, V> Debug for SeqMap<K, V>
 where
-    K: Eq + Hash + Clone + Debug,
+    K: Eq + Hash + Debug,
     V: Debug,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
@@ -88,7 +85,7 @@ impl Error for SeqMapError {}
 
 impl<K, V> SeqMap<K, V>
 where
-    K: Eq + Hash + Clone,
+    K: Eq + Hash + Clone, // Clone is because we add it to two containers
 {
     /// Creates a new, empty `SeqMap`.
     ///
@@ -249,8 +246,8 @@ where
 
 impl<K, V> Index<&K> for SeqMap<K, V>
 where
-    K: Eq + Hash + Clone + Display,
-    V: Display,
+    K: Eq + Hash + Clone,
+    V: Clone,
 {
     type Output = V;
 
@@ -275,8 +272,8 @@ where
 
 impl<K, V> From<&[(K, V)]> for SeqMap<K, V>
 where
-    K: Eq + Hash + Clone + Display,
-    V: Clone + Display,
+    K: Eq + Hash + Clone,
+    V: Clone,
 {
     /// Creates a `SeqMap` from a slice of key-value pairs.
     ///
@@ -306,7 +303,7 @@ where
 
 impl<'a, K, V> IntoIterator for &'a SeqMap<K, V>
 where
-    K: Eq + Hash + Clone + Display,
+    K: Eq + Hash + Clone,
 {
     type Item = (&'a K, &'a V);
     type IntoIter = std::iter::Map<std::slice::Iter<'a, (K, V)>, fn(&'a (K, V)) -> (&'a K, &'a V)>;

@@ -5,6 +5,16 @@
 
 use seq_map::SeqMap;
 
+pub struct TestStruct {
+    pub a: i32,
+    pub b: i32,
+}
+
+#[derive(Eq, PartialEq, Hash, Clone)]
+pub struct TestKey {
+    pub a: i32,
+}
+
 #[test]
 fn display() {
     let mut map = SeqMap::new();
@@ -34,6 +44,16 @@ fn index() {
     assert_eq!(map.get_index(&42), Some(1));
     assert_eq!(map.get_index(&10), Some(0));
     assert_eq!(map.get_index(&100), None);
+}
+
+#[test]
+fn index_struct() {
+    let mut map = SeqMap::new();
+
+    map.insert(TestKey { a: 20 }, 20).expect("should work");
+    map.insert(TestKey { a: 42 }, -13).expect("should work");
+
+    assert_eq!(map.get_index(&TestKey { a: 42 }), Some(1));
 }
 
 #[test]
@@ -68,4 +88,18 @@ fn test_hash() {
     map2.hash(&mut hasher2);
 
     assert_eq!(hasher1.finish(), hasher2.finish());
+}
+
+#[test]
+fn iter_struct() {
+    let mut map = SeqMap::new();
+
+    map.insert(TestKey { a: 10 }, TestStruct { a: 10, b: 20 })
+        .expect("should work");
+    map.insert(TestKey { a: -10 }, TestStruct { a: -10, b: 42 })
+        .expect("should work");
+
+    for (k, v) in &map {
+        assert_eq!(k.a, v.a)
+    }
 }
