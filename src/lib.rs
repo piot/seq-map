@@ -377,10 +377,7 @@ where
     }
 }
 
-impl<K, V> Default for SeqMap<K, V>
-where
-    K: Eq + Hash + Clone,
-{
+impl<K, V> Default for SeqMap<K, V> {
     /// Creates a new, empty `SeqMap`.
     ///
     /// # Examples
@@ -390,6 +387,9 @@ where
     /// let map: SeqMap<String, i32> = SeqMap::default();
     /// ```
     fn default() -> Self {
-        Self::new()
+        Self {
+            key_to_index: HashMap::default(),
+            entries: Vec::default(),
+        }
     }
 }
