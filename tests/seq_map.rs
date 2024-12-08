@@ -57,17 +57,6 @@ fn index_struct() {
 }
 
 #[test]
-fn iter() {
-    let mut map = SeqMap::new();
-
-    map.insert(10, 20).expect("should work");
-    map.insert(42, -13).expect("should work");
-    for (k, v) in map.iter() {
-        println!("{}: {}", k, v);
-    }
-}
-
-#[test]
 fn test_hash() {
     use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};
@@ -102,4 +91,63 @@ fn iter_struct() {
     for (k, v) in &map {
         assert_eq!(k.a, v.a)
     }
+}
+
+#[test]
+fn test_iterators() {
+    let mut map = SeqMap::new();
+    map.insert("a", 1).unwrap();
+    map.insert("b", 2).unwrap();
+
+    let pairs: Vec<_> = map.iter().map(|(k, v)| (*k, *v)).collect();
+    assert_eq!(pairs, vec![("a", 1), ("b", 2)]);
+
+    for (_, v) in map.iter_mut() {
+        *v *= 2;
+    }
+
+    assert_eq!(map[&"a"], 2);
+    assert_eq!(map[&"b"], 4);
+
+    let pairs: Vec<_> = map.into_iter().collect();
+    assert_eq!(pairs, vec![("a", 2), ("b", 4)]);
+}
+
+#[test]
+fn test_remove_and_reindex() {
+    let mut map = SeqMap::new();
+    map.insert("a", 1).unwrap();
+    map.insert("b", 2).unwrap();
+    map.insert("c", 3).unwrap();
+
+    assert_eq!(map.remove(&"b"), Some(2));
+
+    // Check order is preserved
+    let keys: Vec<_> = map.keys().copied().collect();
+    assert_eq!(keys, vec!["a", "c"]);
+
+    // Verify indices were updated
+    assert_eq!(map.get_index(&"a"), Some(0));
+    assert_eq!(map.get_index(&"c"), Some(1));
+
+    // Can still insert after remove
+    map.insert("d", 4).unwrap();
+    assert_eq!(map.get_index(&"d"), Some(2));
+}
+
+#[test]
+fn test_extend() {
+    let mut map = SeqMap::new();
+    map.insert("a", 1).unwrap();
+
+    let more = vec![("b", 2), ("c", 3)];
+    map.extend(more);
+
+    assert_eq!(map.len(), 3);
+    let values: Vec<_> = map.values().copied().collect();
+    assert_eq!(values, vec![1, 2, 3]);
+
+    // Test that extend preserves insertion order
+    let keys: Vec<_> = map.keys().copied().collect();
+    assert_eq!(keys, vec!["a", "b", "c"]);
 }

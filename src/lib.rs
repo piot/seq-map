@@ -238,12 +238,20 @@ where
         self.entries.iter().map(|(_, v)| v)
     }
 
+    pub fn values_mut(&mut self) -> impl Iterator<Item = &mut V> {
+        self.entries.iter_mut().map(|(_, v)| v)
+    }
+
     pub fn get_index(&self, key: &K) -> Option<usize> {
         self.key_to_index.get(key).copied()
     }
 
     pub fn iter(&self) -> impl Iterator<Item = (&K, &V)> {
         self.entries.iter().map(|(k, v)| (k, v))
+    }
+
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = (&K, &mut V)> {
+        self.entries.iter_mut().map(|(k, v)| (&*k, v))
     }
 
     /// Retrieves a reference to the value corresponding to the key.
@@ -264,6 +272,34 @@ where
         self.key_to_index
             .get(key)
             .map(|&index| &self.entries[index].1)
+    }
+
+    /// Removes all elements from the map
+    pub fn clear(&mut self) {
+        self.key_to_index.clear();
+        self.entries.clear();
+    }
+
+    /// Removes a key from the map, returning the value if it existed
+    pub fn remove(&mut self, key: &K) -> Option<V> {
+        if let Some(&index) = self.key_to_index.get(key) {
+            self.key_to_index.remove(key);
+            // Update indices for all elements after the removed one
+            for k in self.entries[index + 1..].iter().map(|(k, _)| k) {
+                if let Some(idx) = self.key_to_index.get_mut(k) {
+                    *idx -= 1;
+                }
+            }
+            Some(self.entries.remove(index).1)
+        } else {
+            None
+        }
+    }
+
+    /// Removes all elements from the map and returns them as an iterator
+    pub fn drain(&mut self) -> impl Iterator<Item = (K, V)> + '_ {
+        self.key_to_index.clear();
+        self.entries.drain(..)
     }
 }
 
@@ -391,5 +427,80 @@ impl<K, V> Default for SeqMap<K, V> {
             key_to_index: HashMap::default(),
             entries: Vec::default(),
         }
+    }
+}
+
+// Mutable reference iterator
+impl<'a, K, V> IntoIterator for &'a mut SeqMap<K, V>
+where
+    K: Eq + Hash + Clone,
+{
+    type Item = (&'a K, &'a mut V);
+    type IntoIter =
+        std::iter::Map<std::slice::IterMut<'a, (K, V)>, fn(&'a mut (K, V)) -> (&'a K, &'a mut V)>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.entries.iter_mut().map(|(k, v)| (&*k, v))
+    }
+}
+
+// Consuming iterator
+impl<K, V> IntoIterator for SeqMap<K, V>
+where
+    K: Eq + Hash + Clone,
+{
+    type Item = (K, V);
+    type IntoIter = std::vec::IntoIter<(K, V)>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.entries.into_iter()
+    }
+}
+
+impl<K, V> SeqMap<K, V>
+where
+    K: Eq + Hash + Clone,
+{
+    pub fn into_keys(self) -> impl Iterator<Item = K> {
+        self.entries.into_iter().map(|(k, _)| k)
+    }
+
+    pub fn into_values(self) -> impl Iterator<Item = V> {
+        self.entries.into_iter().map(|(_, v)| v)
+    }
+}
+
+impl<K, V> Extend<(K, V)> for SeqMap<K, V>
+where
+    K: Eq + Hash + Clone,
+{
+    fn extend<T: IntoIterator<Item = (K, V)>>(&mut self, iter: T) {
+        for (k, v) in iter {
+            let _ = self.insert(k, v);
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::SeqMap;
+
+    #[test]
+    fn test_clear_and_drain() {
+        let mut map = SeqMap::new();
+        map.insert("a", 1).unwrap();
+        map.insert("b", 2).unwrap();
+
+        let mut other_map = SeqMap::new();
+        for (k, v) in map.drain() {
+            other_map.insert(k, v).unwrap();
+        }
+        assert!(map.is_empty());
+        assert_eq!(other_map.len(), 2);
+
+        other_map.clear();
+        assert!(other_map.is_empty());
+        assert_eq!(other_map.key_to_index.len(), 0);
+        assert_eq!(other_map.entries.len(), 0);
     }
 }
