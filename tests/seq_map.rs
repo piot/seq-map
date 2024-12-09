@@ -151,3 +151,92 @@ fn test_extend() {
     let keys: Vec<_> = map.keys().copied().collect();
     assert_eq!(keys, vec!["a", "b", "c"]);
 }
+
+// Test `FromIterator` implementation
+
+#[test]
+fn from_iterator() {
+    let pairs = vec![("a", 1), ("b", 2), ("c", 3)];
+
+    let map: SeqMap<_, _> = pairs.into_iter().collect();
+
+    assert_eq!(map.len(), 3);
+    assert_eq!(map.get(&"a"), Some(&1));
+    assert_eq!(map.get(&"b"), Some(&2));
+    assert_eq!(map.get(&"c"), Some(&3));
+
+    // Check order is preserved
+    let keys: Vec<_> = map.keys().collect();
+    assert_eq!(keys, vec![&"a", &"b", &"c"]);
+}
+
+#[test]
+fn from_iterator_with_duplicates() {
+    let pairs = vec![
+        ("a", 1),
+        ("b", 2),
+        ("a", 3), // Duplicate key
+        ("c", 4),
+        ("b", 5), // Duplicate key
+    ];
+
+    let map: SeqMap<_, _> = pairs.into_iter().collect();
+
+    // Check only first occurrences are kept
+    assert_eq!(map.len(), 3);
+    assert_eq!(map.get(&"a"), Some(&1)); // First value kept
+    assert_eq!(map.get(&"b"), Some(&2)); // First value kept
+    assert_eq!(map.get(&"c"), Some(&4));
+
+    // Check order matches first occurrences
+    let keys: Vec<_> = map.keys().collect();
+    assert_eq!(keys, vec![&"a", &"b", &"c"]);
+
+    let values: Vec<_> = map.values().collect();
+    assert_eq!(values, vec![&1, &2, &4]);
+}
+
+#[test]
+fn collect_into_seq_map() {
+    // From filter
+    let pairs = vec![("a", 1), ("b", 2), ("c", 3)];
+    let map: SeqMap<_, _> = pairs.into_iter().filter(|(_, v)| *v > 1).collect();
+
+    assert_eq!(map.len(), 2);
+    assert_eq!(map.get(&"b"), Some(&2));
+    assert_eq!(map.get(&"c"), Some(&3));
+
+    // From map
+    let strings = vec!["hello", "world"];
+    let map: SeqMap<_, _> = strings.into_iter().map(|s| (s, s.len())).collect();
+
+    assert_eq!(map.len(), 2);
+    assert_eq!(map.get(&"hello"), Some(&5));
+    assert_eq!(map.get(&"world"), Some(&5));
+}
+
+#[test]
+fn chain_with_duplicates() {
+    let first = vec![("a", 1), ("b", 2)];
+    let second = vec![("b", 3), ("c", 4)]; // b is duplicate
+
+    let map: SeqMap<_, _> = first.into_iter().chain(second).collect();
+
+    assert_eq!(map.len(), 3);
+    assert_eq!(map.get(&"a"), Some(&1));
+    assert_eq!(map.get(&"b"), Some(&2)); // First occurrence kept
+    assert_eq!(map.get(&"c"), Some(&4));
+
+    // Check order
+    let entries: Vec<_> = map.iter().collect();
+    assert_eq!(entries, vec![(&"a", &1), (&"b", &2), (&"c", &4),]);
+}
+
+#[test]
+fn empty_iterator() {
+    let empty_vec: Vec<(&str, i32)> = Vec::new();
+    let map: SeqMap<&str, i32> = empty_vec.into_iter().collect();
+
+    assert!(map.is_empty());
+    assert_eq!(map.len(), 0);
+}

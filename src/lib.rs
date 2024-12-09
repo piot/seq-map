@@ -360,6 +360,24 @@ where
     }
 }
 
+/// Creates a `SeqMap` from an iterator of key-value pairs.
+///
+/// If duplicate keys are present in the iterator, the first occurrence is kept,
+/// and subsequent duplicates are silently ignored.
+impl<K: Hash, V> FromIterator<(K, V)> for SeqMap<K, V>
+where
+    K: Eq + Clone,
+    V: Clone,
+{
+    fn from_iter<T: IntoIterator<Item = (K, V)>>(iter: T) -> Self {
+        let mut map = SeqMap::new();
+        for (k, v) in iter {
+            let _ = map.insert(k, v); // Intentionally ignore errors for this trait
+        }
+        map
+    }
+}
+
 impl<'a, K, V> IntoIterator for &'a SeqMap<K, V>
 where
     K: Eq + Hash + Clone,
